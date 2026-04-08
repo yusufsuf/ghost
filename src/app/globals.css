@@ -1,26 +1,72 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:           #F5F3EF;
+  --bg-card:      #FFFFFF;
+  --bg-secondary: #EDEAE4;
+  --border:       #E4DFD8;
+  --border-hover: #CAC4BC;
+  --text-primary: #1A1714;
+  --text-secondary: #7A7570;
+  --text-muted:   #B4AEA8;
+  --accent:       #1A1714;
+  --success:      #4A7C59;
+  --error:        #B5471A;
+  --shadow-sm:    0 1px 3px rgba(26,23,20,0.06), 0 1px 2px rgba(26,23,20,0.04);
+  --shadow-md:    0 4px 16px rgba(26,23,20,0.08), 0 2px 6px rgba(26,23,20,0.04);
+  --shadow-lg:    0 12px 40px rgba(26,23,20,0.10), 0 4px 12px rgba(26,23,20,0.06);
+  --checkerboard: repeating-conic-gradient(#E4DFD8 0% 25%, #EDEAE4 0% 50%) 0 0 / 16px 16px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.checker {
+  background: var(--checkerboard);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-fade-in { animation: fadeIn 0.45s ease forwards; }
+.animate-spin    { animation: spin 0.9s linear infinite; }
+
+/* Responsive upload grid */
+@media (max-width: 600px) {
+  .slot-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .angle-row, .ratio-row {
+    flex-wrap: wrap;
+  }
 }
