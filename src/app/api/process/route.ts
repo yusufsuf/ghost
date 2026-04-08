@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     // Upload labeled images to fal storage
     const toFile = (buf: Buffer, name: string) =>
-      new File([buf], name, { type: "image/jpeg" });
+      new File([new Uint8Array(buf)], name, { type: "image/jpeg" });
 
     const [frontUrl, sideUrl, backUrl] = await Promise.all([
       fal.storage.upload(toFile(frontLabeled, "front.jpg")),
