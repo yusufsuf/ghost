@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
         image_urls: [primaryUrl, ...referenceUrls],
         num_images: 1,
         output_format: "png",
-        aspect_ratio: aspectRatio,
+        aspect_ratio: aspectRatio as "9:16" | "16:9" | "5:4" | "4:5" | "auto",
         resolution: "2K",
       },
     });
