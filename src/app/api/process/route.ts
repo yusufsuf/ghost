@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
     const backFile  = formData.get("back")  as File | null;
     const angle       = (formData.get("angle")        as string | null) ?? "front";
     const aspectRatio = (formData.get("aspect_ratio") as string | null) ?? "4:5";
+    const resolution  = (formData.get("resolution")   as string | null) ?? "2K";
 
     if (!frontFile || !sideFile || !backFile) {
       return NextResponse.json({ error: "Ön, yan ve arka görsellerin tamamı gereklidir." }, { status: 400 });
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
         num_images: 1,
         output_format: "png",
         aspect_ratio: aspectRatio as "9:16" | "16:9" | "5:4" | "4:5" | "auto",
-        resolution: "2K",
+        resolution: resolution as "1K" | "2K" | "4K",
       },
     });
 

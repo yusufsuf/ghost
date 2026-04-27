@@ -8,6 +8,7 @@ import DownloadButton from "@/components/DownloadButton";
 type State = "idle" | "loading" | "done" | "error";
 type Angle = "front" | "side" | "back";
 type AspectRatio = "9:16" | "16:9" | "5:4" | "4:5";
+type Resolution = "2K" | "4K";
 
 interface SlotData { file: File; preview: string; }
 
@@ -18,11 +19,13 @@ const SLOTS: { key: Angle; label: string }[] = [
 ];
 
 const RATIOS: AspectRatio[] = ["9:16", "16:9", "5:4", "4:5"];
+const RESOLUTIONS: Resolution[] = ["2K", "4K"];
 
 export default function Home() {
   const [slots, setSlots] = useState<Record<Angle, SlotData | null>>({ front: null, side: null, back: null });
   const [angle, setAngle] = useState<Angle>("front");
   const [ratio, setRatio] = useState<AspectRatio>("4:5");
+  const [resolution, setResolution] = useState<Resolution>("2K");
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<{ image: string; filename: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +53,7 @@ export default function Home() {
       fd.append("back",  slots.back!.file);
       fd.append("angle", angle);
       fd.append("aspect_ratio", ratio);
+      fd.append("resolution", resolution);
 
       const res = await fetch("/api/process", { method: "POST", body: fd });
       const data = await res.json();
@@ -193,6 +197,26 @@ export default function Home() {
                     key={r}
                     active={ratio === r}
                     onClick={() => setRatio(r)}
+                    disabled={isLoading}
+                  >
+                    {r}
+                  </ToggleBtn>
+                ))}
+              </div>
+            </div>
+
+            {/* Resolution */}
+            <div>
+              <SectionLabel>Çözünürlük</SectionLabel>
+              <div
+                className="ratio-row"
+                style={{ display: "flex", gap: 8, marginTop: 12 }}
+              >
+                {RESOLUTIONS.map((r) => (
+                  <ToggleBtn
+                    key={r}
+                    active={resolution === r}
+                    onClick={() => setResolution(r)}
                     disabled={isLoading}
                   >
                     {r}
