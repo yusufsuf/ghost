@@ -33,11 +33,31 @@ const COLOR_OVERRIDES: Record<string, string> = {
   auto:    "",
 };
 
-function buildPrompt(angle: string, garmentColor: string): string {
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff };
+}
+
+function buildPrompt(angle: string, garmentColor: string, hex: string): string {
   const view = ANGLE_VIEWS[angle] ?? ANGLE_VIEWS.front;
-  const colorOverride = COLOR_OVERRIDES[garmentColor] ?? "";
+  let colorRule = "";
+
+  const rgb = hex ? hexToRgb(hex) : null;
+  if (rgb) {
+    const upper = hex.startsWith("#") ? hex.toUpperCase() : `#${hex.toUpperCase()}`;
+    colorRule = `\nPRECISE COLOR TARGET:
+- The garment's exact color is HEX ${upper} (RGB ${rgb.r}, ${rgb.g}, ${rgb.b}).
+- Output every part of the garment in this precise color value, including strap areas, shoulder areas, and any region where shadows or skin show-through might suggest a different tone.
+- Treat any apparent tonal variation in the source photos as shadow/lighting — the underlying fabric color is exactly ${upper}.
+- Do NOT introduce any hue, saturation, or brightness that deviates from this color value.`;
+  } else {
+    colorRule = COLOR_OVERRIDES[garmentColor] ?? "";
+  }
+
   return `Remove the mannequin and all background elements. Keep only the garment exactly as seen from the ${view}. Place it on a pure white background. Preserve all fabric details, textures, stitching, and embellishments. Do not include any text labels in the output.
-${UNIVERSAL_COLOR_RULES}${colorOverride}`;
+${UNIVERSAL_COLOR_RULES}${colorRule}`;
 }
 
 async function addLabel(file: File, label: string): Promise<Buffer> {
@@ -95,7 +115,8 @@ export async function POST(req: NextRequest) {
     const angle        = (formData.get("angle")         as string | null) ?? "front";
     const aspectRatio  = (formData.get("aspect_ratio")  as string | null) ?? "4:5";
     const resolution   = (formData.get("resolution")    as string | null) ?? "2K";
-    const garmentColor = (formData.get("garment_color") as string | null) ?? "auto";
+    const garmentColor    = (formData.get("garment_color")     as string | null) ?? "auto";
+    const garmentColorHex = (formData.get("garment_color_hex") as string | null) ?? "";
 
     if (!frontFile || !sideFile || !backFile) {
       return NextResponse.json({ error: "Ön, yan ve arka görsellerin tamamı gereklidir." }, { status: 400 });
@@ -138,7 +159,7 @@ export async function POST(req: NextRequest) {
 
     const result = await fal.subscribe("fal-ai/nano-banana-pro/edit", {
       input: {
-        prompt: buildPrompt(angle, garmentColor),
+        prompt: buildPrompt(angle, garmentColor, garmentColorHex),
         image_urls: [primaryUrl, ...referenceUrls],
         num_images: 1,
         output_format: "png",

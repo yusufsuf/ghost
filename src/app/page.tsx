@@ -4,12 +4,13 @@ import { useState, useCallback } from "react";
 import Uploader from "@/components/Uploader";
 import ResultViewer from "@/components/ResultViewer";
 import DownloadButton from "@/components/DownloadButton";
+import ColorPicker from "@/components/ColorPicker";
 
 type State = "idle" | "loading" | "done" | "error";
 type Angle = "front" | "side" | "back";
 type AspectRatio = "9:16" | "16:9" | "5:4" | "4:5";
 type Resolution = "2K" | "4K";
-type GarmentColor = "auto" | "white" | "black" | "colored";
+type GarmentColor = "auto" | "white" | "black" | "colored" | "pixel";
 
 interface SlotData { file: File; preview: string; }
 
@@ -26,6 +27,7 @@ const COLORS: { key: GarmentColor; label: string }[] = [
   { key: "white",   label: "Beyaz" },
   { key: "black",   label: "Siyah" },
   { key: "colored", label: "Renkli" },
+  { key: "pixel",   label: "Pixel seç" },
 ];
 
 export default function Home() {
@@ -34,6 +36,7 @@ export default function Home() {
   const [ratio, setRatio] = useState<AspectRatio>("4:5");
   const [resolution, setResolution] = useState<Resolution>("2K");
   const [garmentColor, setGarmentColor] = useState<GarmentColor>("auto");
+  const [garmentColorHex, setGarmentColorHex] = useState<string | null>(null);
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<{ image: string; filename: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +66,9 @@ export default function Home() {
       fd.append("aspect_ratio", ratio);
       fd.append("resolution", resolution);
       fd.append("garment_color", garmentColor);
+      if (garmentColor === "pixel" && garmentColorHex) {
+        fd.append("garment_color_hex", garmentColorHex);
+      }
 
       const res = await fetch("/api/process", { method: "POST", body: fd });
       const data = await res.json();
@@ -275,6 +281,27 @@ export default function Home() {
                   </ToggleBtn>
                 ))}
               </div>
+
+              {garmentColor === "pixel" && (
+                slots.front ? (
+                  <ColorPicker
+                    imageUrl={slots.front.preview}
+                    onColorChange={setGarmentColorHex}
+                  />
+                ) : (
+                  <p style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    marginTop: 12,
+                    padding: "12px 14px",
+                    background: "var(--bg-secondary)",
+                    borderRadius: 10,
+                    textAlign: "center",
+                  }}>
+                    Pixel seçimi için önce Ön fotoğrafı yükle
+                  </p>
+                )
+              )}
             </div>
 
             <Divider />
