@@ -111,25 +111,48 @@ export default function Home() {
           }}>
             <ResultViewer original={slots[angle]!.preview} result={result.image} />
             <DownloadButton imageDataUrl={result.image} filename={result.filename} />
-            <button
-              onClick={handleReset}
-              style={{
-                padding: "12px",
-                borderRadius: 10,
-                border: "1px solid var(--border)",
-                cursor: "pointer",
-                background: "transparent",
-                color: "var(--text-secondary)",
-                fontSize: 13,
-                fontWeight: 400,
-                transition: "all 0.18s ease",
-                letterSpacing: "0.02em",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
-            >
-              + Yeni fotoğraf
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => { setState("idle"); setResult(null); setError(null); }}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  borderRadius: 10,
+                  border: "1px solid var(--accent)",
+                  cursor: "pointer",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  transition: "opacity 0.18s ease",
+                  letterSpacing: "0.02em",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+              >
+                ↻ İşleme devam et
+              </button>
+              <button
+                onClick={handleReset}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  borderRadius: 10,
+                  border: "1px solid var(--border)",
+                  cursor: "pointer",
+                  background: "transparent",
+                  color: "var(--text-secondary)",
+                  fontSize: 13,
+                  fontWeight: 400,
+                  transition: "all 0.18s ease",
+                  letterSpacing: "0.02em",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+              >
+                + Yeni fotoğraf
+              </button>
+            </div>
           </div>
         ) : (
           /* ─── Upload & Settings View ─── */
