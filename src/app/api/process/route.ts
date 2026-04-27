@@ -21,26 +21,41 @@ async function addLabel(file: File, label: string): Promise<Buffer> {
   const meta = await sharp(inputBuffer).metadata();
   const w = meta.width ?? 800;
 
-  const fontSize = Math.max(24, Math.round(w * 0.045));
-  const padding = Math.round(fontSize * 0.6);
-  const boxH = fontSize + padding * 2;
+  const fontSize = Math.max(32, Math.round(w * 0.05));
+  const padding = Math.round(fontSize * 0.7);
 
-  const svgOverlay = `
-    <svg width="${w}" height="${boxH}">
-      <rect x="0" y="0" width="${w}" height="${boxH}" fill="rgba(0,0,0,0.72)" />
-      <text
-        x="${padding}"
-        y="${fontSize + padding - Math.round(fontSize * 0.15)}"
-        font-family="Arial, sans-serif"
-        font-size="${fontSize}"
-        font-weight="bold"
-        fill="white"
-        letter-spacing="2"
-      >${label}</text>
-    </svg>`;
+  // Render the text using Sharp's Pango-based text feature.
+  // Pango handles font fallback automatically (works on both Windows & Linux containers).
+  const textBuffer = await sharp({
+    text: {
+      text: `<span foreground="white">${label}</span>`,
+      font: `sans Bold ${fontSize}`,
+      rgba: true,
+    },
+  }).png().toBuffer();
+
+  const textMeta = await sharp(textBuffer).metadata();
+  const textH = textMeta.height ?? fontSize;
+  const boxH = textH + padding * 2;
+
+  // Solid black bar (no font dependency)
+  const blackBar = await sharp({
+    create: {
+      width: w,
+      height: boxH,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0.82 },
+    },
+  }).png().toBuffer();
+
+  // Combine text onto black bar
+  const labelLayer = await sharp(blackBar)
+    .composite([{ input: textBuffer, top: padding, left: padding }])
+    .png()
+    .toBuffer();
 
   return sharp(inputBuffer)
-    .composite([{ input: Buffer.from(svgOverlay), top: 0, left: 0 }])
+    .composite([{ input: labelLayer, top: 0, left: 0 }])
     .jpeg({ quality: 92 })
     .toBuffer();
 }
