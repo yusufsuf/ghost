@@ -9,6 +9,7 @@ type State = "idle" | "loading" | "done" | "error";
 type Angle = "front" | "side" | "back";
 type AspectRatio = "9:16" | "16:9" | "5:4" | "4:5";
 type Resolution = "2K" | "4K";
+type GarmentColor = "auto" | "white" | "black" | "colored";
 
 interface SlotData { file: File; preview: string; }
 
@@ -20,12 +21,19 @@ const SLOTS: { key: Angle; label: string }[] = [
 
 const RATIOS: AspectRatio[] = ["9:16", "16:9", "5:4", "4:5"];
 const RESOLUTIONS: Resolution[] = ["2K", "4K"];
+const COLORS: { key: GarmentColor; label: string }[] = [
+  { key: "auto",    label: "Otomatik" },
+  { key: "white",   label: "Beyaz" },
+  { key: "black",   label: "Siyah" },
+  { key: "colored", label: "Renkli" },
+];
 
 export default function Home() {
   const [slots, setSlots] = useState<Record<Angle, SlotData | null>>({ front: null, side: null, back: null });
   const [angle, setAngle] = useState<Angle>("front");
   const [ratio, setRatio] = useState<AspectRatio>("4:5");
   const [resolution, setResolution] = useState<Resolution>("2K");
+  const [garmentColor, setGarmentColor] = useState<GarmentColor>("auto");
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<{ image: string; filename: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +62,7 @@ export default function Home() {
       fd.append("angle", angle);
       fd.append("aspect_ratio", ratio);
       fd.append("resolution", resolution);
+      fd.append("garment_color", garmentColor);
 
       const res = await fetch("/api/process", { method: "POST", body: fd });
       const data = await res.json();
@@ -243,6 +252,26 @@ export default function Home() {
                     disabled={isLoading}
                   >
                     {r}
+                  </ToggleBtn>
+                ))}
+              </div>
+            </div>
+
+            {/* Garment color */}
+            <div>
+              <SectionLabel>Elbise rengi</SectionLabel>
+              <div
+                className="ratio-row"
+                style={{ display: "flex", gap: 8, marginTop: 12 }}
+              >
+                {COLORS.map(({ key, label }) => (
+                  <ToggleBtn
+                    key={key}
+                    active={garmentColor === key}
+                    onClick={() => setGarmentColor(key)}
+                    disabled={isLoading}
+                  >
+                    {label}
                   </ToggleBtn>
                 ))}
               </div>
